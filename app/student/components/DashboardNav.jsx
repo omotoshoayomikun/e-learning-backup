@@ -35,8 +35,6 @@ const params = useParams();
     getId();
   }, [])
 
-  console.log(fetch)
-
   const handleNavProfile = () => {
 
   }

@@ -3,8 +3,8 @@
 // import Sidebar from "../../../components/Sidebar";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import DashboardNav from "../../../components/DashboardNav";
-import Sidebar from "@components/Sidebar";
+import DashboardNav from "../../../../components/DashboardNav";
+import Sidebar from "../../../../components/Sidebar";
 
 const GetStarted = () => {
   const router = useRouter();
