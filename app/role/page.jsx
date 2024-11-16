@@ -1,9 +1,11 @@
-import React from 'react'
+import React, { Suspense } from 'react'
 import Role from '../../components/Role'
 
 const page = () => {
   return (
-    < Role />
+    <Suspense fallback={<div>Loading...</div>}>
+      < Role />
+    </Suspense>
   )
 }
 

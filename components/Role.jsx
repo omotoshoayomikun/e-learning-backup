@@ -1,19 +1,49 @@
-'use client'
+"use client";
 
 import Image from "next/image";
 import Link from "next/link";
-import React, { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import React, { useEffect, useState } from "react";
 
 const Role = () => {
+  const params = useSearchParams();
+  // console.log(params.get("route"))
   // State to manage the selected role and button activity
   const [selectedRole, setSelectedRole] = useState("");
   const [buttonEnabled, setButtonEnabled] = useState(false);
+  const [route, setRoute] = useState("");
+
+
+  useEffect(() => {
+  if(params.get("route")) {
+    setRoute(params.get("route"));
+  } else {
+    setRoute("");
+  }
+  }, [params.get("route")]);
 
   // Handler when a role is clicked
   const handleRoleClick = (role) => {
     setSelectedRole(role);
     setButtonEnabled(true);
   };
+
+  const handleRoute = () => {
+    if(buttonEnabled) {
+      if(selectedRole === "Student" && route) {
+        return "/student/getstarted/login"
+      } else if(selectedRole === "Student" && !route) {
+        return "/student/getstarted"
+      } else if(selectedRole === "Lecturer" && route) {
+        return "/lecturer/getstarted/login"
+      } else if(selectedRole === "Lecturer" && !route) {
+        return "/lecturer/getstarted"
+      }
+    } else {
+      return "#"
+    }
+  }
+
 
   return (
     <div className="flex flex-col justify-center items-center">
@@ -79,13 +109,7 @@ const Role = () => {
       <div className="mt-10">
         {/* Conditionally enable the Continue button based on selection */}
         <Link
-          href={
-            buttonEnabled
-              ? selectedRole === "Student"
-                ? "/student/getstarted"
-                : "lecturer/getstarted"
-              : "#"
-          }
+          href={handleRoute()}
           className={`flex items-center justify-center text-[#A0A0A0] font-normal text-[20px] w-[550px] rounded-full h-[64px] 
           ${
             buttonEnabled
