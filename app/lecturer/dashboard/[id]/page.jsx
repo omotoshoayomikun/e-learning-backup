@@ -1,13 +1,15 @@
 "use client";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import Sidebar from "../../../components/Sidebar";
-import DashboardNav from "../../../components/DashboardNav";
+import Sidebar from "../../../../components/Sidebar";
+import DashboardNav from "../../../../components/DashboardNav";
 
 const Dashboard = () => {
   const router = useRouter();
+  const params = useParams();
+
   const handleGetstarted = () => {
     router.push(`/dashboard/getstarted`);
   };
@@ -30,7 +32,9 @@ const Dashboard = () => {
       <Sidebar />
       <div className="ml-60 w-full bg-[#F9F9F9]">
         <div className="bg-white w-full h-[128px]">
-          <DashboardNav />
+          <Suspense fallback={<>Loading...</>}>
+          <DashboardNav params={params.id} />
+          </Suspense>
         </div>
 
         <motion.div

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Btn } from "../../../../components/Forms/Btn";
 import { useRouter } from "next/navigation";
 import { Input } from '../../../../components/Forms/Input';
+import { loginApi } from '../../../../utils/Actions';
 
 const Login = () => {
   const router = useRouter();
@@ -45,7 +46,27 @@ const Login = () => {
   };
 
   const handleContinue = async () => {
-    router.push(`/lecturer/dashboard`);
+
+    
+    if(value.staff_id === "" || value.password === "") return 
+// CYS/ND/F22/3411
+    try {
+      setLoading(true);
+      const response = await loginApi(`api/auth/login`, value);
+      if (response.success) {
+        setErrorMsg("");
+        router.push(`/lecturer/dashboard/${response.data._id}`);
+      } else {
+        setErrorMsg(response.message);
+      }
+    } catch (err) {
+      setErrorMsg(err.message);
+    } finally {
+      setLoading(false);
+    }
+
+
+    // router.push(`/lecturer/dashboard`);
   }
 
 

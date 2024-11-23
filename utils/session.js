@@ -5,7 +5,7 @@
 import { SignJWT, jwtVerify } from "jose";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 const key = new TextEncoder().encode(process.env.SECRET);
 const cookie = {
@@ -44,7 +44,7 @@ export const createSession = async (id, role, isAdmin) => {
     path: "/",
     // expires: expires,
   });
-  // redirect(`pass-code/${userId}`)
+  
 };
 
 
@@ -58,11 +58,19 @@ export const verifyToken = async (request) => {
   if(!token) {
    return null;
   }
-
   return token;
  
 }
 
+export const verifyUser = async () => {
+
+  const verify = await verifyToken(cookies())
+  if (!verify) return null;
+
+  if(NextRequest.user?.id !== verify.id) return null; 
+
+  return true;
+}
 
 // export const getUserId = async () => {
 //   const accessCookie = await cookies().get(cookies.name).then((cookieJar) => cookieJar.get(cookies.name));

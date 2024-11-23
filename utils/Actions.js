@@ -1,14 +1,14 @@
 "use server";
 
+import { NextRequest, NextResponse } from "next/server";
 import axiosClient from "../config/client";
-import { createSession } from "./session";
+import { createSession, verifyUser } from "./session";
 
 const baseUrl =  process.env.BASEURL
 
 export const usePostApi = async (url, body) => {
   try {
     const response = await axiosClient.post(`/${url}`, body, {headers: {'Content-Type': 'application/json'}});
-
     const data = await response.data;
     if (response.status === 200) {
       return { success: true, message: data.message, data: data.data };
@@ -22,7 +22,6 @@ export const usePostApi = async (url, body) => {
 
 
 export const GetApi = async (url) => {
-  console.log(url)
     try {
         const response = await axiosClient.get(`/${url}`);
         const data = await response.data;
@@ -37,6 +36,24 @@ export const GetApi = async (url) => {
       }
 }
 
+export const VerifyGetApi = async (url) => {
+  try {
+
+  const checkUser = await verifyUser()
+  if(!checkUser) return { success: false, message: data.message };
+  
+    const response = await axiosClient.get(`/${url}`);
+    const data = await response.data;
+    if (response.status === 200) {
+      return { success: true, message: data.message, data: data.data };
+    } else {
+      return { success: false, message: data.message };
+    }
+  } catch (err) {
+    console.log(err)
+    return { success: false, message: err.response?.data?.message || err.message };
+  }
+}
 
 export const loginApi = async (url, body) => {
   try {

@@ -2,11 +2,36 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Input } from "../../../components/Forms/Input";
+import { Btn } from "../../../components/Forms/Btn";
+import { usePostApi } from "../../../utils/Actions";
 
 const Signup = () => {
   const router = useRouter();
-  const handleContinue = () => {
-    router.push(`/lecturer/getstarted/createpassword/123`);
+  const [inputValue, setInputValue] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const handleContinue = async () => {
+    if (inputValue == "") return;
+    try {
+      setLoading(true);
+      const response = await usePostApi(`api/lecturer/check-lecturer`, {
+        staff_id: inputValue,
+      });
+      if (response.success) {
+        setErrorMsg("");
+        router.push(`/lecturer/getstarted/createpassword/${response.data?._id}`);
+      } else {
+        setErrorMsg(response.message);
+      }
+    } catch (err) {
+      setErrorMsg(err.message);
+    } finally {
+      setLoading(false);
+    }
+
+    // router.push(`/lecturer/getstarted/createpassword/123`);
   };
 
   const handleLogin = () => {
@@ -16,8 +41,6 @@ const Signup = () => {
   const handleSignup = () => {
     router.push(`/lecturer/getstarted`);
   };
-
-  const [inputValue, setInputValue] = useState("");
 
   // Function to handle input change
   const handleInputChange = (event) => {
@@ -49,27 +72,13 @@ const Signup = () => {
           >
             Please enter your Staff Identity number
           </p>
-          <input
-            className="appearance-none border w-full py-3 px-4 text-gray-700 mb-4 leading-tight focus:outline-none focus:shadow-outline"
-            id="staff-id"
-            type="text"
-            placeholder="Enter Staff ID"
-            value={inputValue}
-            onChange={handleInputChange}
-          />
+
+          <Input handleChange={handleInputChange} id="staff_id" type="text" placeholder="Enter staff ID" value={inputValue} />
+
+          <div className="text-red-700 text-center font-bold">{errorMsg}</div>
 
           <div className="flex items-center justify-center mt-5">
-            <button
-              className={`font-normal py-3 px-10 w-[150px] focus:outline-none focus:shadow-outline rounded-full ${
-                inputValue
-                  ? "bg-primary text-white"
-                  : "bg-gray-300 text-[#A0A0A0]"
-              }`}
-              type="button"
-              onClick={handleContinue}
-            >
-              Continue
-            </button>
+            <Btn label="Continue" handleClick={handleContinue} disabled={inputValue ? false : true} loading={loading} />
           </div>
         </form>
       </div>

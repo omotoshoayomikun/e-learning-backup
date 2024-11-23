@@ -36,12 +36,12 @@ const Page = () => {
     if (course.progress === 100) {
       // Navigate to the course details page if the course is complete
       router.push(
-        `/dashboard/courses/${course.id}?title=${encodedTitle}&imgSrc=${encodedImgSrc}`
+        `/lecturer/courses/continue/${course.id}?title=${encodedTitle}&imgSrc=${encodedImgSrc}`
       );
     } else {
       // Navigate to a different page (e.g., continue course page) if the course is not complete
       router.push(
-        `/dashboard/courses/continue/${course.id}?title=${encodedTitle}&imgSrc=${encodedImgSrc}`
+        `/lecturer/courses/continue/${course.id}?title=${encodedTitle}&imgSrc=${encodedImgSrc}`
       );
     }
   };
