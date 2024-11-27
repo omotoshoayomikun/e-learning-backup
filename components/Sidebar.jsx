@@ -3,9 +3,10 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { usePathname } from 'next/navigation';
+import { useParams, usePathname } from 'next/navigation';
 
-const Sidebar = () => {
+const Sidebar = (props) => {
+  // const params = useParams();
   const [active, setActive] = useState('');
   const [mounted, setMounted] = useState(false);
 
@@ -45,8 +46,8 @@ const Sidebar = () => {
       <nav className="mt-5">
         <ul>
           {[
-            { name: 'Dashboard', path: '/lecturer/dashboard', icon: '/assets/dashboard-icon-black.png' },
-            { name: 'Courses', path: '/lecturer/courses', icon: '/assets/courses-icon.png' },
+            { name: 'Dashboard', path: `/lecturer/dashboard/${props.params}`, icon: '/assets/dashboard-icon-black.png' },
+            { name: 'Courses', path: `/lecturer/courses/${props.params}`, icon: '/assets/courses-icon.png' },
             { name: 'My Activity', path: '/lecturer/activity', icon: '/assets/activity-icon.png' },
             { name: 'Time Table', path: '/lecturer/timetable', icon: '/assets/timetable-icon.png' },
             { name: 'Inbox', path: '/lecturer/inbox', icon: '/assets/timetable-icon.png' },

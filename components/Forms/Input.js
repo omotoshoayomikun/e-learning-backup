@@ -9,3 +9,15 @@ export const Input = (props) => {
     />
   );
 };
+
+export const TextArea = (props) => {
+  const {handleTextarea, rel_styles, name, ...values} = props;
+  return (
+    <textarea
+    className="border border-gray-300 rounded-md w-[920px] h-[122px] p-2 text-black"
+    {...values}
+    style={rel_styles}
+    onChange={(e) => props.handleTextarea(e, name)}
+  />
+  )
+}

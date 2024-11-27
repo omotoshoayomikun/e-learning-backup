@@ -20,6 +20,34 @@ export const usePostApi = async (url, body) => {
   }
 };
 
+export const usePutApi = async (url, body) => {
+  try {
+    const response = await axiosClient.put(`/${url}`, body, {headers: {'Content-Type': 'application/json'}});
+    const data = await response.data;
+    if (response.status === 200) {
+      return { success: true, message: data.message, data: data.data };
+    } else {
+      return { success: false, message: data.message };
+    }
+  } catch (err) {
+    return { success: false, message: err.response?.data?.message || err.message };
+  }
+};
+
+export const usePutFormApi = async (url, body) => {
+  try {
+    const response = await axiosClient.put(`/${url}`, body, {headers: {'Content-Type': 'multipart/form-data'}});
+    const data = await response.data;
+    if (response.status === 200) {
+      return { success: true, message: data.message, data: data.data };
+    } else {
+      return { success: false, message: data.message };
+    }
+  } catch (err) {
+    return { success: false, message: err.response?.data?.message || err.message };
+  }
+};
+
 
 export const GetApi = async (url) => {
     try {

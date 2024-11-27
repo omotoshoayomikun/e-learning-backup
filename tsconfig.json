@@ -29,7 +29,7 @@
     ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx"
-, "utils/session.js"  ],
+, "utils/session.js", "app/lecturer/layout.jsx"  ],
   "exclude": [
     "node_modules"
   ]

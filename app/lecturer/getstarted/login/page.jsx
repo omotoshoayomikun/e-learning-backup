@@ -38,11 +38,11 @@ const Login = () => {
   };
 
   const handleLogin = () => {
-    router.push(`/login`);
+    router.push(`/lecturer/getstarted/login`);
   };
 
   const handleSignup = () => {
-    router.push(`/signup`);
+    router.push(`/lecturer/getstarted`);
   };
 
   const handleContinue = async () => {

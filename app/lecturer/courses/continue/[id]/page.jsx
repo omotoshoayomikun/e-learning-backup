@@ -1,62 +1,107 @@
 "use client";
 import { useRouter, useParams } from "next/navigation";
 import { useSearchParams } from "next/navigation";
-import dynamic from "next/dynamic";
 import Sidebar from "../../../../../components/Sidebar";
 import DashboardNav from "../../../../../components/DashboardNav";
+import DynamicTextEditor from "../../../../../components/Forms/DynamicTextEditor";
 import { useState, useEffect } from "react";
+import { PreviousBtn, ContinueBtn} from "../../../../../components/Forms/Btn"
 
-// Dynamically import ReactQuill to avoid server-side issues
-const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
-import "react-quill/dist/quill.snow.css";
 import Image from "next/image";
+import { TextArea } from "../../../../../components/Forms/Input";
+import {GetApi, usePutFormApi } from "../../../../../utils/Actions";
 
 const ContinueCourse = () => {
   const router = useRouter();
-  //const { id } = router.query || {}; // Get course ID from the URL
+  const params = useParams();
   const searchParams = useSearchParams();
-  const title = searchParams.get("title");
-  const imgSrc = searchParams.get("imgSrc");
-  const { id } = useParams(); // This will correctly extract the dynamic id from the URL
 
-  const [courseDescription, setCourseDescription] = useState("");
-  const [subtitle, setSubtitle] = useState("");
-  //const [id, setId] = useState(null); // State to store the course ID
+  const CourseId = searchParams.get("courseId")
+
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [data, setData] = useState({})
+  
+  const [value, setValue] = useState({
+    desc: "",
+    subtitle: ""
+  });
+
+  useEffect(() => {
+    const fetchCourse = async() =>{
+      try {
+        try {
+          setLoading(true);
+          const response = await GetApi(`api/course/${CourseId}`);
+          if (response.success) {
+            setData(response.data);
+            setValue({desc: response.data?.desc, subtitle: response.data.subtitle})
+          } else {
+            setErrorMsg(response.message);
+            return setData({});
+          }
+        } catch (err) {
+          setErrorMsg(err.message);
+        } finally {
+          setLoading(false);
+        }
+      } catch (e) {
+
+      }
+    }
+
+    fetchCourse()
+  }, [])
+
 
   // Function to handle "Continue" button click
-  const handleContinue = () => {
-    if (!subtitle || courseDescription.length < 200) {
-      alert(
-        "Please ensure the subtitle is filled and the course description has at least 200 words."
-      );
-    } else {
-      // Handle course submission
-      router.push(`/dashboard/courses/continue/${id}/requirements`);
-      //console.log("Submitting:", { subtitle, courseDescription });
+  const handleContinue = async() => {
+
+    // if(data.progress && data.progress >= 10) {
+    //   return router.push(`/lecturer/courses/continue/requirements/${params.id}`);
+    // } else {
+      
+    // }
+
+    if (!value.subtitle || value.desc.length < 200) return alert( "Please ensure the subtitle is filled and the course description has at least 200 words.");
+
+    try {
+      const formData = new FormData();
+      formData.append("desc", value.desc);
+      formData.append("subtitle", value.subtitle);
+      data.progress && !data.progress >= 10  && formData.append("progress", 10);
+      
+
+
+      setLoading(true);
+      const response = await usePutFormApi(`api/course/${CourseId}`, formData);
+      if (response.success) {
+        setErrorMsg("");
+        router.push(`/lecturer/courses/continue/requirements/${params.id}?courseId=${response.data._id}`);
+
+      } else {
+        setErrorMsg(response.message);
+      }
+    } catch (err) {
+      setErrorMsg(err.message);
+    } finally {
+      setLoading(false);
     }
+
+
   };
 
-  // Use useEffect to wait for router.query to be populated
-  useEffect(() => {
-    if (router.query && router.query.id) {
-      setId(router.query.id); // Set the course ID once it's available
-    }
-  }, [router.query]);
-
-  if (!title || !imgSrc) {
-    return <p>Loading...</p>; // Display a loading message if the data is not yet available
-  }
 
   return (
     <div className="flex w-full">
       {/* Sidebar */}
-      <Sidebar />
+      <Sidebar params={params.id} />
 
       {/* Main Content */}
       <div className="ml-60 w-full">
         {/* Dashboard Navigation */}
         <div className="bg-white w-full h-[128px]">
-          <DashboardNav />
+          <DashboardNav params={params.id} />
         </div>
 
         <div className="flex flex-col items-center w-full mt-8">
@@ -71,12 +116,7 @@ const ContinueCourse = () => {
             <label className="text-black text-[20px] font-bold mb-2">
               Course subtitle
             </label>
-            <textarea
-              className="border border-gray-300 rounded-md w-[920px] h-[122px] p-2 text-black"
-              placeholder="e.g. Define ... , Identify ...."
-              value={subtitle}
-              onChange={(e) => setSubtitle(e.target.value)}
-            />
+            <TextArea name="subtitle" value={value.subtitle} placeholder="e.g. Define ... , Identify ...." handleTextarea={(e) => setValue({...value, subtitle: e.target.value})} />
             <p className="text-gray-500 mt-2 text-[14px] font-normal">
               Your title should be a mix of attention-grabbing, informative
               content. It should have a minimum of 80 words.
@@ -100,21 +140,7 @@ const ContinueCourse = () => {
               <label className="text-black text-[20px] font-bold mb-2">
                 Course description
               </label>
-              <ReactQuill
-                value={courseDescription}
-                onChange={setCourseDescription}
-                className="h-[218px] mb-4"
-                placeholder="Insert your course description"
-                theme="snow"
-                modules={{
-                  toolbar: [
-                    [{ header: "1" }, { header: "2" }, { font: [] }],
-                    [{ list: "ordered" }, { list: "bullet" }],
-                    ["bold", "italic", "underline"],
-                    [{ align: [] }],
-                  ],
-                }}
-              />
+              <DynamicTextEditor value={value.desc} handleDes={(e) => setValue({...value, desc: e})} />
             </div>
           </div>
           <div className="items-start">
@@ -122,23 +148,15 @@ const ContinueCourse = () => {
               Description should have a minimum of 200 words.
             </p>
           </div>
+            {/* THIS DISPLAY THE ERROR MESSAGE */}
+            <div className="text-red-700 text-center font-bold">{errorMsg}</div>
           {/* Bottom Buttons */}
           <div className="flex flex-row justify-between mt-8 mb-10 gap-[370px]">
             <div>
-              <button
-                className="text-primary border border-primary rounded-full px-6 py-2 w-[250px] h-[50px] font-semibold"
-                onClick={() => router.back()}
-              >
-                Previous
-              </button>
+              <PreviousBtn handleClick={() => router.back()} label="Previous" />
             </div>
             <div>
-              <button
-                className="bg-primary text-white rounded-full px-6 py-2 w-[250px] h-[50px] font-semibold"
-                onClick={handleContinue}
-              >
-                Continue
-              </button>
+              <ContinueBtn handleClick={handleContinue} label="Continue" loading={loading} />
             </div>
           </div>
         </div>

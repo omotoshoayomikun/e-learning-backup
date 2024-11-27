@@ -7,20 +7,20 @@ import { VerifyGetApi } from "../utils/Actions";
 
 const GetLecturer = async (params) => {
   try {
-    const response = await VerifyGetApi(`api/lecturer/${params}`);
-    if (response.success) {
+    // const response = await VerifyGetApi(`api/lecturer/${params}`);
+    // if (response.success) {
       // setUser(response.data);
       // setFetch(true);
-      return response.data;
-    } else {
+      // return response.data;
+    // } else {
       // setFetch(false);
       // setErrorMsg(response.message);
-      return null;
-    }
+      // return null;
+    // }
   } catch (err) {
     // setFetch(false);
     // console.log(err);
-    return null;
+    // return null;
     // setErrorMsg(err.message);
   }
 };

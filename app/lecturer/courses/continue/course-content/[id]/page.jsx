@@ -12,7 +12,10 @@ import Modal from "react-modal";
 
 const page = () => {
   const router = useRouter();
+  const params = useParams();
   const searchParams = useSearchParams();
+
+  const CourseId = searchParams.get("courseId")
   //const title = searchParams.get("title");
   //const imgSrc = searchParams.get("imgSrc");
   //const { id } = useParams(); // This will correctly extract the dynamic id from the URL
@@ -151,13 +154,13 @@ const page = () => {
   return (
     <div className="flex w-full">
       {/* Sidebar */}
-      <Sidebar />
+      <Sidebar params={params.id} />
 
       {/* Main Content */}
       <div className="ml-60 w-full">
         {/* Dashboard Navigation */}
         <div className="bg-white w-full h-[128px]">
-          <DashboardNav />
+          <DashboardNav params={params.id} />
         </div>
 
         {/* Content */}

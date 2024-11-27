@@ -6,13 +6,20 @@ import Sidebar from "../../../../components/Sidebar";
 import DashboardNav from "../../../../components/DashboardNav";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+// import DynamicTextEditor from "../../../../components/Forms/DynamicTextEditor";
 
-const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
-import "react-quill/dist/quill.snow.css";
+// const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
+// import "react-quill/dist/quill.snow.css";
 
 const messages = [];
 
 const InboxPage = () => {
+
+  const DynamicTextEditor = dynamic(
+    () => import("../../../../components/Forms/DynamicTextEditor"),
+    { ssr: false }
+  );
+
   const [sortOrder, setSortOrder] = useState("Newest");
   const [filter, setFilter] = useState("All");
   const [messageContent, setMessageContent] = useState("");
@@ -30,18 +37,18 @@ const InboxPage = () => {
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
-    if (file) {
-      const uploadSimulation = setInterval(() => {
-        setUploadProgress((prev) => {
-          if (prev >= 100) {
-            clearInterval(uploadSimulation);
-            setUploadedFile(file.name); // Show file name on successful upload
-            return 100;
-          }
-          return prev + 10; // Simulate upload progress
-        });
-      }, 200); // Adjust time interval as needed
-    }
+    // if (file) {
+    //   const uploadSimulation = setInterval(() => {
+    //     setUploadProgress((prev) => {
+    //       if (prev >= 100) {
+    //         clearInterval(uploadSimulation);
+    //         setUploadedFile(file.name); // Show file name on successful upload
+    //         return 100;
+    //       }
+    //       return prev + 10; // Simulate upload progress
+    //     });
+    //   }, 200); // Adjust time interval as needed
+    // }
   };
 
   const filteredMessages = messages.filter((message) => {
@@ -126,18 +133,7 @@ const InboxPage = () => {
 
             {/* Rich Text Editor with React Quill */}
             <div className="border border-gray-300 rounded-md p-3 mb-4">
-              <ReactQuill
-                value={messageContent}
-                onChange={handleQuillChange}
-                modules={{
-                  toolbar: [
-                    ["bold", "italic", "underline"],
-                    [{ list: "ordered" }, { list: "bullet" }],
-                    ["link", "image"],
-                  ],
-                }}
-                placeholder="Write your message here..."
-              />
+              <DynamicTextEditor value={messageContent} handleDes={handleQuillChange} />
             </div>
 
             {/* Attachment Section */}

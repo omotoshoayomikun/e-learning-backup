@@ -6,22 +6,80 @@ import Sidebar from "../../../../../../components/Sidebar";
 import DashboardNav from "../../../../../../components/DashboardNav";
 import Image from "next/image";
 import { useSearchParams, useRouter, useParams } from "next/navigation";
+import { ContinueBtn, PreviousBtn } from "../../../../../../components/Forms/Btn";
+import {  GetApi, usePutApi } from "../../../../../../utils/Actions";
 
 const page = () => {
   const router = useRouter();
-  //const { id } = router.query || {}; // Get course ID from the URL
+  const params = useParams();
   const searchParams = useSearchParams();
-  const title = searchParams.get("title");
-  const imgSrc = searchParams.get("imgSrc");
-  const { id } = useParams(); // This will correctly extract the dynamic id from the URL
+
+  const CourseId = searchParams.get("courseId")
+
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [data, setData] = useState({})
+
   const [responses, setResponses] = useState([""]); // State to store the added responses
 
+
+  
+  useEffect(() => {
+    const fetchCourse = async() =>{
+      try {
+        try {
+          setLoading(true);
+          const response = await GetApi(`api/course/${CourseId}`);
+          if (response.success) {
+            setData(response.data);
+            setResponses(response.data.prerequisites);
+          } else {
+            setData({});
+            setErrorMsg(response.message);
+          }
+        } catch (err) {
+          setErrorMsg(err.message);
+        } finally {
+          setLoading(false);
+        }
+      } catch (e) {
+
+      }
+    }
+
+    fetchCourse()
+  }, [])
+
   // Function to handle "Continue" button click
-  const handleContinue = () => {
-    // Handle course submission
-    router.push(`/dashboard/courses/continue/${id}/course-content`);
-    //console.log("Submitting:", { subtitle, courseDescription });
-  };
+  const handleContinue = async () => {
+    if(responses.length > 0) {
+      try {
+        // const formData = new FormData();
+        // formData.append("prerequisites", JSON.stringify(responses));
+        // formData.append("progress", 10);
+  
+        setLoading(true);
+        const body = {
+          prerequisites: responses,
+
+        }
+
+        const response = await usePutApi(`api/course/${CourseId}`, {prerequisites: responses, progress: data.progress && !data.progress >= 20 ? 20 : data.progress});
+        if (response.success) {
+          setErrorMsg("");
+          router.push(`/lecturer/courses/continue/course-content/${params.id}?courseId=${response.data._id}`)
+  
+        } else {
+          setErrorMsg(response.message);
+        }
+      } catch (err) {
+        setErrorMsg(err.message);
+      } finally {
+        setLoading(false);
+      }
+      // return router.push(`/lecturer/courses/continue/course-content/${params.id}?courseId=${response.data._id}`);
+    };
+  }
 
   // Use useEffect to wait for router.query to be populated
   useEffect(() => {
@@ -51,13 +109,13 @@ const page = () => {
   return (
     <div className="flex w-full">
       {/* Sidebar */}
-      <Sidebar />
+      <Sidebar params={params.id} />
 
       {/* Main Content */}
       <div className="ml-60 w-full">
         {/* Dashboard Navigation */}
         <div className="bg-white w-full h-[128px]">
-          <DashboardNav />
+          <DashboardNav params={params.id} />
         </div>
 
         <motion.div
@@ -125,18 +183,8 @@ const page = () => {
 
             {/* Bottom Buttons */}
             <div className="flex items-center justify-items-center w-full gap-[195px] mt-12 ml-[335px]">
-              <button
-                className="text-primary border border-primary rounded-full px-6 py-2 w-[250px] h-[50px] font-semibold"
-                onClick={() => console.log("Going back")} // Replace with actual back navigation
-              >
-                Previous
-              </button>
-              <button
-                className="bg-primary text-white rounded-full px-6 py-2 w-[250px] h-[50px] font-semibold"
-                onClick={handleContinue} // Replace with actual continue action
-              >
-                Continue
-              </button>
+              <PreviousBtn handleClick={() => router.back()} label="Previous" />
+              <ContinueBtn handleClick={handleContinue} label="Continue" loading={loading} />
             </div>
           </div>
         </motion.div>
