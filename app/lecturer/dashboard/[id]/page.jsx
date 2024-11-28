@@ -11,7 +11,7 @@ const Dashboard = () => {
   const params = useParams();
 
   const handleGetstarted = () => {
-    router.push(`/dashboard/getstarted`);
+    router.push(`/lecturer/dashboard/getstarted/${params.id}`);
   };
 
   const JoinClass = () => {
@@ -34,7 +34,9 @@ const Dashboard = () => {
       <div className="ml-60 w-full">
         {/* Dashboard Navigation */}
         <div className="bg-white w-full h-[128px]">
-          <DashboardNav />
+          {/* <Suspense fallback={<>Loading...</>}> */}
+          <DashboardNav params={params.id} />
+          {/* </Suspense> */}
         </div>
       <motion.div
         initial={{ opacity: 0, scale: 0.9, rotate: 10 }}

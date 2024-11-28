@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Sidebar from "../../../../../../components/Sidebar";
 import DashboardNav from "../../../../../../components/DashboardNav";
@@ -9,6 +9,9 @@ import { BsFillTrashFill } from "react-icons/bs";
 import { MdOutlineEdit } from "react-icons/md";
 import Image from "next/image";
 import Modal from "react-modal";
+import { GetApi, usePutApi } from "../../../../../../utils/Actions";
+import axios from "axios";
+import { ContinueBtn } from "../../../../../../components/Forms/Btn";
 
 const page = () => {
   const router = useRouter();
@@ -23,27 +26,52 @@ const page = () => {
   const [selectedFile, setSelectedFile] = useState(null); // State to manage selected file
   const [fileStatus, setFileStatus] = useState("pending"); // State to track file processing status
 
-  // Function to handle file selection
-  const handleFileChange = (e) => {
-    setSelectedFile(e.target.files[0]);
-    setFileStatus("processing"); // Set status to processing after file selection
-
-    // Simulate file upload process
-    setTimeout(() => {
-      setFileStatus("successful"); // Set status to successful after file processing
-      setIsModalOpen(false); // Close modal after file selection
-    }, 2000); // Simulate a 2-second file upload process
-  };
-
+  const [data, setData] = useState({})
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+    
   const [sections, setSections] = useState([
     {
-      id: 1,
+      count: 1,
       title: "Introduction",
-      lectures: [{ id: 1, title: "Introduction to the Course" }],
+      content: "",
+      fileStatus: "pending",
+      lectures: [{ count: 1, title: "Introduction to the Course" }],
       quizzes: [],
       assignments: [],
     },
   ]);
+
+
+   
+  useEffect(() => {
+    const fetchCourse = async() =>{
+      try {
+        try {
+          setLoading(true);
+          const response = await GetApi(`api/course/${CourseId}`)
+          if (response.success) {
+            setData(response.data);
+            if(response.data.section.length > 0) setSections(response.data.section);
+            setSelectedImage(response.data.thumbnail)
+          } else {
+            setData({});
+            setErrorMsg(response.message);
+          }
+        } catch (err) {
+          setErrorMsg(err.message);
+        } finally {
+          setLoading(false);
+        }
+      } catch (e) {
+
+      }
+    }
+
+    fetchCourse()
+  }, [])
+
+
 
   const [quizSections, setQuizSections] = useState([
     {
@@ -78,6 +106,7 @@ const page = () => {
     }
   };
 
+
   // States for managing the addition of lectures, quizzes, and assignments
   const [newLecture, setNewLecture] = useState("");
   const [isAddingLecture, setIsAddingLecture] = useState(null); // Track lecture input visibility per section
@@ -89,13 +118,41 @@ const page = () => {
   }); // Track assignment data
   const [isAddingAssignment, setIsAddingAssignment] = useState(null); // Track assignment input visibility per section
 
+
+
+
   const addSection = () => {
     const newSection = {
-      id: sections.length + 1,
+      count: sections.length + 1,
       title: `Section ${sections.length + 1}`,
       lectures: [],
+      fileStatus: "pending",
+      quizzes: [],
+      assignments: [],
     };
     setSections([...sections, newSection]);
+  };
+
+
+    
+  // Function to handle file selection
+  const handleFileChange = (e, sectionIndex) => {
+    const updatedSections = [...sections];
+
+    setSelectedFile(e.target.files[0]);
+    updatedSections[sectionIndex].content = e.target.files[0];
+    
+    setFileStatus("processing"); // Set status to processing after file selection
+    updatedSections[sectionIndex].fileStatus = "processing";
+    
+    // Simulate file upload process
+    setTimeout(() => {
+      setFileStatus("successful"); // Set status to successful after file processing
+      updatedSections[sectionIndex].fileStatus = "successful";
+      setIsModalOpen(false); // Close modal after file selection
+    }, 2000); // Simulate a 2-second file upload process
+
+    setSections(updatedSections);
   };
 
   const handleAddLecture = (sectionIndex) => {
@@ -103,7 +160,7 @@ const page = () => {
     const newLectureId = updatedSections[sectionIndex].lectures.length + 1;
 
     updatedSections[sectionIndex].lectures.push({
-      id: newLectureId,
+      count: newLectureId,
       title: newLecture,
     });
 
@@ -115,10 +172,10 @@ const page = () => {
   // Function to add a new quiz to a section
   const handleAddQuiz = (sectionIndex) => {
     const updatedSections = [...sections];
-    const newQuizId = updatedSections[sectionIndex].quizzes.length + 1;
+    const newQuizId = sections[sectionIndex].quizzes.length + 1;
 
     updatedSections[sectionIndex].quizzes.push({
-      id: newQuizId,
+      count: newQuizId,
       title: newQuiz.title,
       description: newQuiz.description,
     });
@@ -135,7 +192,7 @@ const page = () => {
       updatedSections[sectionIndex].assignments.length + 1;
 
     updatedSections[sectionIndex].assignments.push({
-      id: newAssignmentId,
+      // id: newAssignmentId,
       title: newAssignment.title,
       description: newAssignment.description,
     });
@@ -146,9 +203,51 @@ const page = () => {
   };
 
   //handle submit button
-  const handleSubmit = () => {
-    convertopenModal();
-    router.push("/dashboard");
+  const handleSubmit = async () => {
+
+    setLoading(true);
+
+    for (let i = 0; i < sections.length; i++) {
+      if(sections[i].content instanceof String) continue;
+      const formData = new FormData();
+      formData.append("file", sections[i].content)
+      formData.append("upload_preset", "e-learning-files")
+      formData.append("cloud_name", "ayomikun")
+
+      try {
+       const cloud_response = await axios.post("https://api.cloudinary.com/v1_1/ayomikun/auto/upload", formData)
+       console.log(cloud_response.data)
+        sections[i].content = await cloud_response.data.secure_url;
+
+        setSections([...sections]);
+
+      } catch(err) {
+        console.log(err)
+        setErrorMsg("");
+        setErrorMsg(response.message);
+      }
+      
+    }
+
+
+    try {
+     
+      const response = await usePutApi(`api/course/${CourseId}`, {section: sections, progress: data.progress && !data.progress >= 60 ? 60 : data.progress});
+      if (response.success) {
+        setErrorMsg("");
+        router.push(`/lecturer/courses/continue/course-content/${params.id}?courseId=${response.data._id}`)
+
+      } else {
+        setErrorMsg(response.message);
+      }
+    } catch (err) {
+      setErrorMsg(err.message);
+    } finally {
+      setLoading(false);
+    }
+
+    // convertopenModal();
+    // router.push("/dashboard");
   };
 
   return (
@@ -184,11 +283,11 @@ const page = () => {
           {/* Sections & Lectures */}
           {sections.map((section, sectionIndex) => (
             <div
-              key={section.id}
+              key={sectionIndex}
               className="border border-black mb-6 rounded-sm bg-[#EEEFF4] p-4"
             >
               <p className="text-[20px] text-black font-bold mb-1">
-                Section {section.id}:
+                Section {section.count}:
               </p>
               <div className="flex flex-row items-center gap-2 mb-4">
                 <Image
@@ -202,9 +301,9 @@ const page = () => {
                 </p>
               </div>
               {/* Lectures */}
-              {section.lectures.map((lecture) => (
+              {section.lectures.map((lecture, index) => (
                 <div
-                  key={lecture.id}
+                  key={index}
                   className="flex flex-col bg-white border-black border p-3 mb-4 rounded-sm"
                 >
                   {/* Lecture Info */}
@@ -219,7 +318,7 @@ const page = () => {
                         />
                         <p className="text-lg ml-1">
                           <span className="font-medium text-black text-[20px]">
-                            Lecture {lecture.id}:
+                            Lecture {lecture.count}:
                           </span>
                         </p>
                       </div>
@@ -251,6 +350,7 @@ const page = () => {
                           width={24}
                           height={24}
                           className="w-[24px] h-[24px]"
+                          alt="Image alt"
                         />
                         <p className="text-black font-medium text-[20px]">
                           Content
@@ -270,25 +370,27 @@ const page = () => {
                   <div className="mt-4 flex flex-row items-center">
                     <div className="flex flex-col justify-center items-start">
                       {/* Show the processing or success message based on file status */}
-                      {fileStatus === "processing" && (
+                      {sections[sectionIndex].fileStatus === "processing" && (
                         <div className="flex flex-row items-center justify-center gap-3">
                           <Image
                             src="/assets/image-process.png"
                             width={150}
                             height={50}
                             className="w-[171px] h-[72px]"
+                            alt="image alt"
                           />
                           <p className="text-red-500 font-medium">
                             Processing...
                           </p>
                         </div>
                       )}
-                      {fileStatus === "successful" && (
+                      {sections[sectionIndex].fileStatus === "successful" && (
                         <div className="flex flex-row items-center justify-center gap-3">
                           <Image
                             src="/assets/image-process.png"
                             width={150}
                             height={50}
+                            alt="image alt"
                             className="w-[171px] h-[72px]"
                           />
                           <div className="flex flex-col">
@@ -358,7 +460,7 @@ const page = () => {
                             type="file"
                             accept=".pdf"
                             className="hidden"
-                            onChange={handleFileChange}
+                            onChange={(e) => handleFileChange(e, sectionIndex)}
                           />
                         </label>
                       </div>
@@ -373,9 +475,9 @@ const page = () => {
               )}
 
               {/* Quizzes */}
-              {section.quizzes.map((quiz) => (
+              {section.quizzes.map((quiz, index) => (
                 <div
-                  key={quiz.id}
+                  key={index}
                   className="flex flex-col items-start justify-between bg-white border-black border p-3 mb-4 rounded-sm"
                 >
                   <div className="">
@@ -388,7 +490,7 @@ const page = () => {
                       />
                       <p className="text-lg ml-1">
                         <span className="font-medium text-black text-[20px]">
-                          Quiz {quiz.id}:
+                          Quiz {quiz.count}:
                         </span>{" "}
                       </p>
                       <MdOutlineEdit className="cursor-pointer text-xl text-black ml-1" />
@@ -408,6 +510,7 @@ const page = () => {
                         src="/assets/add-black.png"
                         width={16}
                         height={16}
+                        alt="image alt"
                         className="w-[16px] h-[16px]"
                       />
                       <p className="text-black font-medium text-[16px]">
@@ -419,9 +522,9 @@ const page = () => {
               ))}
 
               {/* Assignments */}
-              {section.assignments.map((assignment) => (
+              {section.assignments.map((assignment, index) => (
                 <div
-                  key={assignment.id}
+                  key={index}
                   className="flex flex-col items-start justify-between bg-white border-black border p-3 mb-4 rounded-sm"
                 >
                   <div className="">
@@ -434,7 +537,7 @@ const page = () => {
                       />
                       <p className="text-lg ml-1">
                         <span className="font-medium text-black text-[20px]">
-                          Assignment {assignment.id}:
+                          Assignment {assignment.count}:
                         </span>
                       </p>
                       <MdOutlineEdit className="cursor-pointer text-xl text-black ml-1" />
@@ -597,6 +700,7 @@ const page = () => {
               <Image
                 src="/assets/add-black.png"
                 width={24}
+                alt="image alt"
                 height={24}
                 className="w-[24px] h-[24px]"
               />{" "}
@@ -650,6 +754,7 @@ const page = () => {
                         width={20}
                         height={20}
                         className="w-[20px] h-[20px]"
+                        alt="image alt"
                       />
                       <p className="text-white text-[16px] text-semibold">
                         Image is successfully uploaded!
@@ -663,12 +768,14 @@ const page = () => {
 
           {/* Submit Button */}
           <div className="mt-[64px] flex justify-center">
-            <button
+            {/* <button
               onClick={handleSubmit}
               className="bg-primary text-white py-3 px-8 rounded-full text-lg font-semibold"
             >
               Submit for Review
-            </button>
+            </button> */}
+            
+            <ContinueBtn label="Submit for Review" loading={loading} handleClick={handleSubmit} />
           </div>
 
           <div className="flex items-center justify-center ">

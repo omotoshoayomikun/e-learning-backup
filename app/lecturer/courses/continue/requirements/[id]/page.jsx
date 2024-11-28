@@ -64,7 +64,7 @@ const page = () => {
 
         }
 
-        const response = await usePutApi(`api/course/${CourseId}`, {prerequisites: responses, progress: data.progress && !data.progress >= 20 ? 20 : data.progress});
+        const response = await usePutApi(`api/course/${CourseId}`, {prerequisites: responses, progress: data.progress && !data.progress >= 40 ? 40 : data.progress});
         if (response.success) {
           setErrorMsg("");
           router.push(`/lecturer/courses/continue/course-content/${params.id}?courseId=${response.data._id}`)

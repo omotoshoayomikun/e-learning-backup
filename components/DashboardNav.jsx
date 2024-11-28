@@ -1,40 +1,48 @@
 "use client";
 import Image from "next/image";
-import React from "react";
-import { useParams, useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { VerifyGetApi } from "../utils/Actions";
+import { GetApi, VerifyGetApi } from "../utils/Actions";
 
-const GetLecturer = async (params) => {
-  try {
-    // const response = await VerifyGetApi(`api/lecturer/${params}`);
-    // if (response.success) {
-      // setUser(response.data);
-      // setFetch(true);
-      // return response.data;
-    // } else {
-      // setFetch(false);
-      // setErrorMsg(response.message);
-      // return null;
-    // }
-  } catch (err) {
-    // setFetch(false);
-    // console.log(err);
-    // return null;
-    // setErrorMsg(err.message);
-  }
-};
-
-const DashboardNav = ({ params }) => {
+const DashboardNav = (props) => {
   const router = useRouter();
+  const [data, setData] = useState({})
 
-  const data = GetLecturer(params);
+    
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
-  if (!data) return;
-
-  const handleNavProfile = () => {
-    router.push("/lecturer/profile");
+useEffect(() => {
+  
+  const GetLecturer = async () => {
+    try {
+      const response = await GetApi(`api/lecturer/${props.params}`);
+      if (response.success) {
+        setData(response.data);
+        setErrorMsg("");
+        setCourses(response.data)
+      } else {
+        setErrorMsg(response.message);
+      }
+    } catch(err) {
+      console.log(err);
+      setErrorMsg(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  GetLecturer();
+
+}, [])
+
+
+  // if (!data) return;
+
+  // const handleNavProfile = () => {
+  //   router.push("/lecturer/profile");
+  // };
 
   const createCourse = () => {
     router.push("/dashboard/courses");
@@ -53,7 +61,7 @@ const DashboardNav = ({ params }) => {
         Start the Class
       </button>
       <Link
-        href="/lecturer/profile"
+        href={`/lecturer/profile/${props.params}`}
         className="flex items-center cursor-pointer"
       >
         <div className="relative mr-4">
@@ -68,9 +76,8 @@ const DashboardNav = ({ params }) => {
             height={48}
           />
         </div>
-        <div
+        <Link href={`/lecturer/profile/${props.params}`}
           className="flex items-center cursor-pointer"
-          onClick={handleNavProfile}
         >
           <Image
             src={data.image ? data.image : "/assets/images/user.png"}
@@ -80,8 +87,8 @@ const DashboardNav = ({ params }) => {
             height={50}
             className="rounded-full"
           />
-          <p className="ml-2 text-black font-semibold">Dr. James Adetola</p>
-        </div>
+          <p className="ml-2 text-black font-semibold capitalize">{data.lastname} {data.middlename} {data.firstname}</p>
+        </Link>
       </Link>
     </header>
   );

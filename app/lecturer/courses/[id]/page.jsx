@@ -87,7 +87,7 @@ const Page = () => {
       <div className="ml-60 w-full">
         {/* Dashboard Navigation */}
         <div className="bg-white w-full h-[128px]">
-          <DashboardNav />
+          <DashboardNav  params={params.id} />
         </div>
 
         {/* Courses List */}

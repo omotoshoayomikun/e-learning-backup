@@ -1,9 +1,9 @@
 "use client";
 
-import Sidebar from "../../../components/Sidebar";
+import Sidebar from "../../../../../components/Sidebar";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import DashboardNav from "../../../components/DashboardNav";
+import DashboardNav from "../../../../../components/DashboardNav";
 import { useState } from "react";
 
 const EventPage = () => {
