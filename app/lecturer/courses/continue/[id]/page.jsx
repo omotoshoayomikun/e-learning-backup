@@ -69,7 +69,7 @@ const ContinueCourse = () => {
       const formData = new FormData();
       formData.append("desc", value.desc);
       formData.append("subtitle", value.subtitle);
-      data.progress && !data.progress >= 20  && formData.append("progress", 20);
+      data.progress && data.progress >= 20? formData.append("progress", data.progress)  : formData.append("progress", 20);
       
 
 

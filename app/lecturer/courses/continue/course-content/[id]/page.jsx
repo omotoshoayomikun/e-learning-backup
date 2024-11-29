@@ -208,7 +208,7 @@ const page = () => {
     setLoading(true);
 
     for (let i = 0; i < sections.length; i++) {
-      if(sections[i].content instanceof String) continue;
+      if(typeof sections[i].content === "string") continue;
       const formData = new FormData();
       formData.append("file", sections[i].content)
       formData.append("upload_preset", "e-learning-files")
@@ -223,8 +223,7 @@ const page = () => {
 
       } catch(err) {
         console.log(err)
-        setErrorMsg("");
-        setErrorMsg(response.message);
+        setErrorMsg(err.message);
       }
       
     }
@@ -232,10 +231,10 @@ const page = () => {
 
     try {
      
-      const response = await usePutApi(`api/course/${CourseId}`, {section: sections, progress: data.progress && !data.progress >= 60 ? 60 : data.progress});
+      const response = await usePutApi(`api/course/${CourseId}`, {section: sections, progress: data.progress && data.progress >= 60 ? data.progress : 60});
       if (response.success) {
         setErrorMsg("");
-        router.push(`/lecturer/courses/continue/course-content/${params.id}?courseId=${response.data._id}`)
+        convertopenModal();
 
       } else {
         setErrorMsg(response.message);
@@ -246,7 +245,6 @@ const page = () => {
       setLoading(false);
     }
 
-    // convertopenModal();
     // router.push("/dashboard");
   };
 

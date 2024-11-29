@@ -125,10 +125,10 @@ const Page = () => {
                       </p>
                       <div className="flex flex-row items-center gap-2">
                         <p className="text-black font-bold text-[14px]">
-                          {course.status === "Draft" ? "DRAFT" : ""}{" "}
+                          {course.progress < 100 ? "DRAFT" : ""}{" "}
                         </p>
                         <p className="text-[14px] font-normal text-black">
-                          {course.public ? "Public" : "Private"}
+                          {course.progress >= 60 ? "Public" : "Private"}
                         </p>
                       </div>
                     </div>

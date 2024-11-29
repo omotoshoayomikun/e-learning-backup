@@ -14,6 +14,10 @@ const GetStarted = () => {
 
   const [data, setData] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState("");
+  const [nameCourse, setNameCourse] = useState({
+    name: "",
+    code: "",
+  });
 
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -45,10 +49,15 @@ const GetStarted = () => {
     router.push(`/dashboard`);
   };
 
+  const handleCourseSelect = (e, name, code) => {
+    setSelectedCourse(e.target.id)
+    setNameCourse({ name: name, code: code })
+  };
+
   const handleContinueClick = () => {
     if(selectedCourse == "") return;
-
-    router.push(`/lecturer/courses/continue/event/${params.id}?courseId=${selectedCourse}`);
+    const courseName = `${nameCourse.name} (${nameCourse.code})`
+    router.push(`/lecturer/courses/continue/event/${params.id}?courseId=${selectedCourse}&courseName=${courseName}`);
   };
 
   return (
@@ -83,7 +92,7 @@ const GetStarted = () => {
                           id={res._id}
                           name="course"
                           className="mr-2"
-                          onChange={(e) => {console.log(e.target.id)}}
+                          onChange={(e) => handleCourseSelect(e, res.name, res.code)}
                         />
                         <label htmlFor="course1" className="text-lg text-black">
                           {res.name} ({res.code})
