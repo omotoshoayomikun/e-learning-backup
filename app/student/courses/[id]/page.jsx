@@ -1,54 +1,82 @@
 "use client";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react"; // Import useState to handle expand/collapse state
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { useParams, useRouter } from "next/navigation";
 import DashboardNav from "../../components/DashboardNav";
 import Sidebar from "../../components/Sidebar";
+//import coursesData from "@app/student/data/courses";
+import coursesData from "../../data/courses"; // Import course data
+import { GetApi } from "../../../../utils/Actions";
 
-const CourseDetails = ({ params }) => {
-  const searchParams = useSearchParams();
-  const { id } = params;
+const CoursesPage = () => {
+  const params = useParams();
+  const [filter, setFilter] = useState("all");
   const router = useRouter();
+  const [details, setDetails] = useState({});
+  const [courses, setCourses] = useState([]);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [loadingStudent, setLoadingStudent] = useState(false);
+  const [loadingCourse, setLoadingCourse] = useState(false);
 
-  const [expandedSections, setExpandedSections] = useState({}); // State to track expanded sections
+  const filteredCourses = coursesData.filter((course) => {
+    if (filter === "all") return true;
+    return course.addedTime === filter;
+  });
 
-  const toggleSection = (index) => {
-    setExpandedSections((prev) => ({
-      ...prev,
-      [index]: !prev[index],
-    }));
-  };
+  useEffect(() => {
 
-  const navigateToLecture = () => {
-    router.push(`/student/courses/classroom/${id}`);
-  };
+    const getStudent = async () => {
+      try {
+        setLoadingStudent(true);
+        const response = await GetApi(`api/student/${params.id}`);
+        if (response.success) {
+          setDetails(response.data);
+          setErrorMsg("");
 
-  const navigateToLecturer = () => {
-    //router.push(`/dashboard/profile/${id}`);
-    router.push(`/dashboard/profile`);
-  };
+          setLoadingCourse(true);
+          await GetApi(
+            `api/course/course-student/student?level=${response.data.level}&department=${response.data.department}`
+          )
+            .then((result) => {
+              if (result.success) {
+                setCourses(result.data);
+                setErrorMsg("");
+              } else {
+                setErrorMsg(result.message);
+              }
+            })
+            .catch((err) => {
+              console.log(err);
+              setErrorMsg(err.message);
+            })
+            .finally(() => {
+              setLoadingCourse(false);
+            });
+        } else {
+          setErrorMsg(response.message);
+        }
+      } catch (err) {
+        console.log(err);
+        setErrorMsg(err.message);
+      } finally {
+        setLoadingStudent(false);
+      }
+    };
 
-  const course = {
-    id: 1,
-    courseName: "(CYS 311) Introduction to Security and Policy Development",
-    lecturer: "Dr. Ajibade Solomon",
-    description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-    content: [
-      { title: "Course Overview", details: "This course contains of the overview needed fo the introduction and getting started of this course." },
-      { title: "Cybersecurity Introduction", details: "courseIntro.mp4" },
-      { title: "Cyber Attacks", details: "SQLtest.injection" },
-      { title: "Cyber Defenses", details: "cyber labs practice." },
-    ],
+    getStudent();
+  }, []);
+
+  const navigateToDetails = (id) => {
+    router.push(`/student/courses/course-detail/${params.id}?courseId=${id}`); // Navigate to dynamic page
   };
 
   return (
     <div className="flex w-full">
-      <Sidebar />
+      <Sidebar params={params.id} />
       <div className="ml-60 w-full">
         <div className="bg-white w-full h-[128px]">
-          <DashboardNav />
+          <DashboardNav params={params.id} />
         </div>
 
         <motion.div
@@ -63,106 +91,69 @@ const CourseDetails = ({ params }) => {
             stiffness: 300,
           }}
         >
-          <div className="flex gap-[60px]">
-            <div>
+          <div className="flex flex-row items-center justify-between">
+            <div className="flex flex-row gap-2 items-center bg-black p-3 h-[37px]">
               <Image
-                src="/assets/cyss311.png"
-                width={513}
-                height={300}
-                alt="course"
-                className="rounded-md w-[513px]"
+                src="/assets/activity.png"
+                width={20}
+                height={20}
+                className="w-[25px] h-[25px] rounded-full"
+                alt="profile"
               />
-              <h1 className="text-[20px] w-[513px] font-bold mt-4">
-                {course.courseName}
-              </h1>
-              <p className="mt-2 w-[513px] text-left">{course.description}</p>
-              <div className="bg-[#F2F2F2] w-[513px] p-3">
-                <h2 className="text-[20px] font-bold">What you’ll learn</h2>
-                <ul className="list-disc text-[16px] mt-2">
-                  {course.content.map((section, index) => (
-                    <div key={index} className="flex flex-row gap-2 items-center">
-                      <Image
-                        src="/assets/check.png"
-                        width={14}
-                        height={14}
-                        className="w-[14px] h-[14px]"
-                        alt="check"
-                      />
-                      <p>{section.title}</p>
-                    </div>
-                  ))}
-                </ul>
-                <p className="text-[14px] font-bold">show more</p>
-              </div>
+              <p className="text-white font-semibold text-[20px]">Activity</p>
             </div>
+            <div className="flex justify-end">
+              <select
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                className="text-black font-medium text-[16px] bg-white border p-3 rounded-sm"
+              >
+                <option value="NEWEST">Newest</option>
+                <option value="OLDEST">Oldest</option>
+                <option value="RECENT">Recent</option>
+              </select>
+            </div>
+          </div>
 
-            <div className="w-[563px]">
-              <h2 className="text-[24px] font-bold">Course Content</h2>
-              <div className="flex flex-col mt-2 gap-3">
-                {course.content.map((section, index) => (
-                  <div key={index}>
-                    <div
-                      className="flex flex-row items-center justify-between cursor-pointer"
-                      onClick={() => toggleSection(index)}
-                    >
-                      <p className="font-medium text-[16px]">{section.title}</p>
-                      <Image
-                        src={expandedSections[index] ? "/assets/collapse.png" : "/assets/add-black.png"}
-                        width={14}
-                        height={14}
-                        className=""
-                        alt={expandedSections[index] ? "collapse" : "expand"}
-                      />
-                    </div>
-                    {expandedSections[index] && (
-                      <p className="text-[14px] mt-2 text-gray-600">{section.details}</p>
-                    )}
-                  </div>
-                ))}
-                <button
-                  onClick={navigateToLecture}
-                  className="flex flex-row gap-3 items-center mt-4 p-2 bg-black justify-center h-[56px] text-white w-full"
+          <div className="grid grid-cols-2 gap-[30px] mt-5">
+            {loadingCourse ? (
+              <>Loading...</>
+            ) : (
+              courses.map((course) => (
+                <div
+                  key={course.id}
+                  className="bg-outline border-[1px] border-[#00000046] cursor-pointer"
+                  onClick={() => navigateToDetails(course._id)}
                 >
-                  Lecture room
-                  <Image
-                    src="/assets/east.png"
-                    width={24}
-                    height={24}
-                    className="w-[24px] h-[24px]"
-                    alt="lecture room"
-                  />
-                </button>
-              </div>
-
-              <div className="flex flex-col gap-4 mt-20">
-                <div>
-                  <p className="text-black font-bold text-[24px]">Lecturer</p>
+                  <div className="flex items-center gap-3">
+                    <Image
+                      src={course.thumbnail}
+                      width={188}
+                      height={188}
+                      alt="course"
+                      className="w-[188px] h-[188px]"
+                    />
+                    <div>
+                      <p className="font-bold text-black text-[20px]">
+                        {course.name} ({course.code})
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <Image
+                          src={course?.lecturer_id.image ? course?.lecturer_id.image : "/assets/images/user.png"}
+                          width={25}
+                          height={25}
+                          className="rounded-full"
+                          alt="lecturer"
+                        />
+                        <p className="font-medium text-black text-[16px]">
+                          {course.lecturer_id.lastname} {course.lecturer_id.firstname}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex flex-row items-center gap-3">
-                  <Image
-                    src="/assets/images/profile.jpg"
-                    width={50}
-                    height={50}
-                    className="rounded-full"
-                    alt="lecturer"
-                  />
-                  <p>{course.lecturer}</p>
-                </div>
-
-                <div>
-                  <p className="text-black font-normal text-[16px]">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-                    do eiusmod tempor incididunt ut labore et dolore magna
-                    aliqua. Ut enim ad minim veniam, quis nostrud exercitation
-                    ullamco laboris nisi ut aliquip ex ea commod.
-                  </p>
-                  <p className="font-bold mt-1">show more</p>
-                </div>
-              </div>
-              <button onClick={navigateToLecturer} className="flex flex-row gap-3 items-center mt-4 p-2 bg-outline border border-black justify-center h-[56px] text-black w-full">
-                View Profile
-              </button>
-            </div>
+              ))
+            )}
           </div>
         </motion.div>
       </div>
@@ -170,4 +161,4 @@ const CourseDetails = ({ params }) => {
   );
 };
 
-export default CourseDetails;
+export default CoursesPage;

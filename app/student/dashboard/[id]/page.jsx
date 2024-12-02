@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Sidebar from "../../components/Sidebar";
+import { GetApi } from "../../../../utils/Actions";
 
 const Dashboard = () => {
   const router = useRouter();
@@ -22,17 +23,90 @@ const Dashboard = () => {
   };
 
   const [isClient, setIsClient] = useState(false);
+  const [details, setDetails] = useState({})
+  const [courses, setCourses] = useState([])
+  const [errorMsg, setErrorMsg] = useState("")
+  const [loadingStudent, setLoadingStudent] = useState(false)
+  const [loadingCourse, setLoadingCourse] = useState(false)
 
   useEffect(() => {
     setIsClient(true); // Ensures this logic runs only on the client-side
+
+        
+    const getStudent = async () => {
+      try {
+        setLoadingStudent(true)
+        const response = await GetApi(`api/student/${params.id}`)
+        if (response.success) {
+          setDetails(response.data)
+          setErrorMsg("");
+
+
+          setLoadingCourse(true)
+          await GetApi(`api/course/course-student/student?level=${response.data.level}&department=${response.data.department}`)
+          .then((result) => {
+            if (result.success) {
+              setCourses(result.data)
+              setErrorMsg("");
+            } else {
+              setErrorMsg(result.message);
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+            setErrorMsg(err.message);
+          })
+          .finally(() => {
+            setLoadingCourse(false)
+          })
+
+
+        } else {
+          setErrorMsg(response.message);
+        }
+      } catch(err) {
+        console.log(err);
+        setErrorMsg(err.message);
+      } finally {
+        setLoadingStudent(false);
+      }
+    }
+
+
+    // const getCourses = async () => {
+    //   try {
+    //     setLoadingCourse(true)
+    //     const res = await GetApi(`api/course/course-student/student?level=${details.level}&${details.department}`)
+    //     if (res.success) {
+    //       setCourses(res.data)
+    //       setErrorMsg("");
+    //     } else {
+    //       setErrorMsg(res.message);
+    //     }
+    //   } catch(err) {
+    //     console.log(err);
+    //     setErrorMsg(err.message);
+    //   } finally {
+    //     setLoadingCourse(false);
+    //   }
+    // }
+        
+    getStudent();
+    // getCourses();
   }, []);
+
+
+  
+
   return (
     <div className="flex">
-      <Sidebar />
+      <Sidebar params={params.id}/>
       <div className="ml-60 w-full bg-[#F9F9F9]">
         <div className="bg-white w-full h-[128px]">
-          <DashboardNav userId={params.id} />
+          <DashboardNav params={params.id} />
         </div>
+
+
 
         <motion.div
           initial={{ opacity: 0, scale: 0.9, rotate: 10 }}
@@ -61,57 +135,47 @@ const Dashboard = () => {
                     </div>{" "}
                     {/* schedule section */} {/* col 1 */}
                     <div className="flex flex-row gap-[24px] mt-4">
-                      {[
-                        {
-                          title: "Networking Essentials (NCC 311)",
-                          time: "10:30 AM",
-                          startsIn: "45 mins",
-                          date: "Wed Feb 15",
-                        },
-                        {
-                          title: "Maths for Cybersecurity (CYS314)",
-                          time: "10:30 AM",
-                          startsIn: "45 mins",
-                          date: "Tue Feb 14",
-                        },
-                      ].map((lecture, index) => (
-                        <div
-                          key={index}
-                          className="bg-primary h-[250px] w-[233px] p-4 rounded-lg"
-                        >
-                          <p className="text-white text-[12px] font-normal">{`Lecture at ${lecture.time}`}</p>
+                      {loadingCourse ? <>Loading...</> : (
+                        courses.map((lecture, index) => (
+                          <div
+                            key={index}
+                            className="bg-primary h-[250px] w-[233px] p-4 rounded-lg"
+                          >
+                            <p className="text-white text-[12px] font-normal">{`Lecture at ${lecture.time}`}</p>
+  
+                            <h3 className="text-[20px] font-bold text-white mt-1">
+                              {lecture.name} ({lecture.code})
+                            </h3>
+                            <div className="flex flex-row gap-2 items-center mt-3">
+                              <Image
+                                src="/assets/access-time.png"
+                                className="w-[16px] h-[16px]"
+                                width={16}
+                                height={16}
+                              />
+                              <p className="text-white font-normal text-[12px]">{`Class starts in ${lecture.startsIn}`}</p>
+                            </div>
+                            <div className="flex flex-row gap-2 items-center mt-2">
+                              <Image
+                                src="/assets/access-date.png"
+                                className="w-[16px] h-[16px]"
+                                width={16}
+                                height={16}
+                              />
+                              <p className="text-white font-normal text-[12px]">{`${lecture.date}`}</p>
+                            </div>
+                            <div className="flex justify-between mt-4">
+                              <button onClick={() => JoinClass(lecture.class_link.link)} className="text-[12px] bg-white w-[105px] rounded-sm h-[27px] text-primary justify-items-center text-center items-center">
+                                Join the Class
+                              </button>
+                              <button onClick={ViewDetails} className="text-white text-[10px]">
+                                View Details
+                              </button>
+                            </div>
+                          </div>
+                        ))
 
-                          <h3 className="text-[20px] font-bold text-white mt-1">
-                            {lecture.title}
-                          </h3>
-                          <div className="flex flex-row gap-2 items-center mt-3">
-                            <Image
-                              src="/assets/access-time.png"
-                              className="w-[16px] h-[16px]"
-                              width={16}
-                              height={16}
-                            />
-                            <p className="text-white font-normal text-[12px]">{`Class starts in ${lecture.startsIn}`}</p>
-                          </div>
-                          <div className="flex flex-row gap-2 items-center mt-2">
-                            <Image
-                              src="/assets/access-date.png"
-                              className="w-[16px] h-[16px]"
-                              width={16}
-                              height={16}
-                            />
-                            <p className="text-white font-normal text-[12px]">{`${lecture.date}`}</p>
-                          </div>
-                          <div className="flex justify-between mt-4">
-                            <button onClick={JoinClass} className="text-[12px] bg-white w-[105px] rounded-sm h-[27px] text-primary justify-items-center text-center items-center">
-                              Join the Class
-                            </button>
-                            <button onClick={ViewDetails} className="text-white text-[10px]">
-                              View Details
-                            </button>
-                          </div>
-                        </div>
-                      ))}
+                      )}
                       <div className="bg-white w-fit h-fit pb-4 rounded-lg">
                         <div className="flex flex-col gap-1 mt-2 p-3">
                           <div className="flex flex-row items-center gap-1">

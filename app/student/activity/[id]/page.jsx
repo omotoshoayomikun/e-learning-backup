@@ -2,9 +2,9 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import DashboardNav from "../components/DashboardNav";
-import Sidebar from "../components/Sidebar";
-import coursesData from "../data/courses";
+import DashboardNav from "../../components/DashboardNav";
+import Sidebar from "../../components/Sidebar";
+import coursesData from "../../data/courses";
 import { useRouter } from "next/navigation";
 
 const page = () => {
@@ -23,13 +23,13 @@ const page = () => {
   return (
     <div className="flex w-full">
       {/* Sidebar */}
-      <Sidebar />
+      <Sidebar params={params.id} />
 
       {/* Main Content */}
       <div className="ml-60 w-full">
         {/* Dashboard Navigation */}
         <div className="bg-white w-full h-[128px]">
-          <DashboardNav />
+        <DashboardNav params={params.id} />
         </div>
 
         {/* Content */}

@@ -7,37 +7,39 @@ import Link from "next/link";
 import { getUserId } from "../../../utils/session";
 import { GetApi } from "../../../utils/Actions";
 
-const DashboardNav = () => {
+const DashboardNav = (props) => {
   
-  const [user, setUser] = useState({})
-const [fetch, setFetch] = useState(false)
-const params = useParams();
-  useEffect(() => {
-    const getId = async () => {
-    //   const id = await getUserId();
-    //  if(id) {
-        try {
-          const response = await GetApi(`api/student/${params.id}`);
-          if (response.success) {
-            setUser(response.data)
-            setFetch(true);
-          } else {
-            setFetch(false);
-            // setErrorMsg(response.message);
-          }
-        } catch (err) {
-          setFetch(false);
-          console.log(err)
-          // setErrorMsg(err.message);
-        }
+  const router = useRouter();
+  const [data, setData] = useState({})
+
+    
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
+useEffect(() => {
+  
+  const GetLecturer = async () => {
+    try {
+      const response = await GetApi(`api/student/${props.params}`);
+      if (response.success) {
+        setData(response.data);
+        setErrorMsg("");
+        setCourses(response.data)
+      } else {
+        setErrorMsg(response.message);
+      }
+    } catch(err) {
+      console.log(err);
+      setErrorMsg(err.message);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    getId();
-  }, [])
+  GetLecturer();
 
-  const handleNavProfile = () => {
+}, [])
 
-  }
   return (
     <header className="flex items-center justify-between mb-8 pt-9 mr-5 ml-5">
       <div className="relative flex items-center w-full max-w-xl h-[52px] bg-white rounded-full p-3 border-black border-[1px]">
@@ -66,13 +68,13 @@ const params = useParams();
         </div>
         <div className="flex items-center">
           <Image
-            src="/assets/images/profile.jpg"
+            src={data.image ? data.image : "/assets/images/user.png"}
             alt="Dr. James Adetola"
             width={50}
             height={50}
             className="rounded-full"
           />
-          <p className="ml-2 text-black font-semibold">Hi SmutBlac</p>
+          <p className="ml-2 text-black font-semibold">Hi, {data.firstname}</p>
         </div>
       </Link>
     </header>

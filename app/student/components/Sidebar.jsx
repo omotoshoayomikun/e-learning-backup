@@ -8,6 +8,7 @@ import { useParams } from 'next/navigation';
 import { usePathname } from 'next/navigation';
 
 const Sidebar = (props) => {
+  // const params = useParams();
   const [active, setActive] = useState('');
   const [mounted, setMounted] = useState(false);
 
@@ -49,12 +50,12 @@ const Sidebar = (props) => {
             { name: 'Dashboard', path: `/student/dashboard/${props.params}`, icon: '/assets/dashboard-icon-black.png' },
             { name: 'Courses', path: `/student/courses/${props.params}`, icon: '/assets/courses-icon.png' },
             { name: 'My Activity', path: `/student/activity/${props.params}`, icon: '/assets/activity-icon.png' },
-            { name: 'Time Table', path: '/student/time-table', icon: '/assets/timetable-icon.png' },
-            { name: 'Inbox', path: '/student/inbox', icon: '/assets/timetable-icon.png' },
-            { name: 'Submissions', path: '/student/submissions', icon: '/assets/submissions-icon.png' },
-            { name: 'Group', path: '/student/group', icon: '/assets/students-icon.png' },
-            { name: 'Quiz', path: '/student/quiz', icon: '/assets/quiz-icon.png' },
-            { name: 'Settings', path: '/student/profile', icon: '/assets/settings-icon.png' },
+            { name: 'Time Table', path: `/student/time-table/${props.params}`, icon: '/assets/timetable-icon.png' },
+            { name: 'Inbox', path: `/student/inbox/${props.params}`, icon: '/assets/timetable-icon.png' },
+            { name: 'Submissions', path: `/student/submissions/${props.params}`, icon: '/assets/submissions-icon.png' },
+            { name: 'Group', path: `/student/group/${props.params}`, icon: '/assets/students-icon.png' },
+            { name: 'Quiz', path: `/student/quiz/${props.params}`, icon: '/assets/quiz-icon.png' },
+            { name: 'Settings', path: `/student/profile/${props.params}`, icon: '/assets/settings-icon.png' },
           ].map((item, index) => (
             <li key={index} className="relative">
               <Link
