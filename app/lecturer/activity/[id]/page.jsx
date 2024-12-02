@@ -1,9 +1,10 @@
 "use client";
-import React, { useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import DashboardNav from "../../../components/DashboardNav";
-import Sidebar from "../../../components/Sidebar";
+import Sidebar from "../../../../components/Sidebar";
+import DashboardNav from "../../../../components/DashboardNav";
 
 const courseActivitysData = [
   {
@@ -105,6 +106,12 @@ const courseActivitysData = [
 ];
 
 const Page = () => {
+  const router = useRouter();
+  const params = useParams();
+
+  const [courses, setCourses] = useState([])
+  const [loading, setLoading] = useState(false); // Initialize loading state
+  const [errorMsg, setErrorMsg] = useState(""); // Initialize error state
   const [filter, setFilter] = useState("all"); // filter state
 
   // Function to handle filtering logic
@@ -113,16 +120,41 @@ const Page = () => {
     return courseActivity.duration === filter;
   });
 
+  useEffect(() => {
+    // Fetch courses for the lecturer
+    const getCourses = async () => {
+      try {
+        setLoading(true); // Start loading
+        const response = await GetApi(`api/course/lecturer-course/${params.id}`);
+        if (response.success) {
+          setCourses(response.data); // Set fetched courses
+          setErrorMsg(""); // Clear any error messages
+        } else {
+          setErrorMsg(response.message); // Show error message if API fails
+        }
+      } catch (err) {
+        console.error(err);
+        setErrorMsg("Error fetching courses"); // Display generic error
+      } finally {
+        setLoading(false); // Stop loading
+      }
+    };
+
+    if (params.id) {
+      getCourses(); // Only fetch if params.id is available
+    }
+  }, [params.id]);
+
   return (
     <div className="flex w-full">
       {/* Sidebar */}
-      <Sidebar />
+      <Sidebar params={params.id} />
 
       {/* Main Content */}
       <div className="ml-60 w-full">
         {/* Dashboard Navigation */}
         <div className="bg-white w-full h-[128px]">
-          <DashboardNav />
+        <DashboardNav params={params.id} />
         </div>
 
         {/* Content */}

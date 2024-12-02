@@ -35,6 +35,10 @@ const CreatePassword = () => {
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [confirmPasswordStrength, setConfirmPasswordStrength] = useState(0);
 
+  //show password and hide
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   // Handle changes to the password input
   const handlePasswordChange = (event) => {
     const pass = event.target.value;
@@ -56,7 +60,15 @@ const CreatePassword = () => {
     return "bg-green-500"; // Strong
   };
 
+  //set password strength text
+  const getStrengthText = (strength) => {
+    if (strength <= 2) return "Weak";
+    if (strength === 3) return "Medium";
+    return "Strong";
+  };
+
   // Check if passwords match and are strong
+  const isPasswordMatch = password === confirmPassword;
   const isFormValid =
     password === confirmPassword &&
     passwordStrength >= 3 &&
@@ -107,41 +119,84 @@ const CreatePassword = () => {
           </p>
 
           {/* Password Input */}
-          <Input
-            id="password"
-            type="password"
-            placeholder="Enter your password"
-            value={password}
-            handleChange={handlePasswordChange}
-          />
+          <div className="relative">
+            <Input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              placeholder="Enter your password"
+              value={password}
+              handleChange={handlePasswordChange}
+            />
+            <span
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer mb-1"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? (
+                <img src="/assets/visibility_on.png" alt="Show" />
+              ) : (
+                <img src="/assets/visibility_off.png" alt="Hide" />
+              )}
+            </span>
+          </div>
 
-          {/* Password Strength Bar */}
-          <div className="w-full h-1 bg-gray-300 mb-4">
-            <div
-              className={`h-full ${getStrengthColor(
-                passwordStrength
-              )} rounded-full`}
-              style={{ width: `${(passwordStrength / 5) * 100}%` }}
-            ></div>
+          {/* Password Strength Bar and Text */}
+          <div className="mb-4">
+            <div className="w-full h-1 bg-gray-300">
+              <div
+                className={`h-full ${getStrengthColor(
+                  passwordStrength
+                )} rounded-full`}
+                style={{ width: `${(passwordStrength / 5) * 100}%` }}
+              ></div>
+            </div>
+            <span className="text-sm font-semibold mt-1 block">
+              {getStrengthText(passwordStrength)}
+            </span>
           </div>
 
           {/* Confirm Password Input */}
-          <Input
-            id="confirmpassword"
-            type="password"
-            placeholder="Confirm your password"
-            value={confirmPassword}
-            handleChange={handleConfirmPasswordChange}
-          />
+          <div className="relative">
+            <Input
+              id="confirmpassword"
+              type={showConfirmPassword ? "text" : "password"}
+              placeholder="Confirm your password"
+              value={confirmPassword}
+              handleChange={handleConfirmPasswordChange}
+            />
+            <span
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            >
+              {showConfirmPassword ? (
+                <img src="/assets/visibility_on.png" alt="Show" />
+              ) : (
+                <img src="/assets/visibility_off.png" alt="Hide" />
+              )}
+            </span>
+          </div>
 
-          {/* Confirm Password Strength Bar */}
-          <div className="w-full h-1 bg-gray-300 mb-4">
-            <div
-              className={`h-full ${getStrengthColor(
-                confirmPasswordStrength
-              )} rounded-full`}
-              style={{ width: `${(confirmPasswordStrength / 5) * 100}%` }}
-            ></div>
+          {/* Confirm Password Strength Bar and Text */}
+          <div className="mb-4">
+            <div className="w-full h-1 bg-gray-300">
+              <div
+                className={`h-full ${getStrengthColor(
+                  confirmPasswordStrength
+                )} rounded-full`}
+                style={{ width: `${(confirmPasswordStrength / 5) * 100}%` }}
+              ></div>
+            </div>
+            <span className="text-sm font-semibold mt-1 block">
+              {getStrengthText(confirmPasswordStrength)}
+            </span>
+          </div>
+
+          {/* Password Match Status */}
+          <div
+            className={`text-center mb-4 font-semibold ${
+              isPasswordMatch ? "text-green-600" : "text-red-600"
+            }`}
+          >
+            {isPasswordMatch ? "Passwords match" : "Passwords do not match"}
           </div>
 
           {/* THIS DISPLAY THE ERROR MESSAGE */}

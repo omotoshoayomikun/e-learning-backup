@@ -48,14 +48,14 @@ const Sidebar = (props) => {
           {[
             { name: 'Dashboard', path: `/lecturer/dashboard/${props.params}`, icon: '/assets/dashboard-icon-black.png' },
             { name: 'Courses', path: `/lecturer/courses/${props.params}`, icon: '/assets/courses-icon.png' },
-            { name: 'My Activity', path: '/lecturer/activity', icon: '/assets/activity-icon.png' },
-            { name: 'Time Table', path: '/lecturer/timetable', icon: '/assets/timetable-icon.png' },
-            { name: 'Inbox', path: '/lecturer/inbox', icon: '/assets/timetable-icon.png' },
-            { name: 'Submissions', path: '/lecturer/submissions', icon: '/assets/submissions-icon.png' },
-            { name: 'All Students', path: '/lecturer/all-students', icon: '/assets/students-icon.png' },
+            { name: 'My Activity', path: `/lecturer/activity/${props.params}`, icon: '/assets/activity-icon.png' },
+            { name: 'Time Table', path: `/lecturer/timetable/${props.params}`, icon: '/assets/timetable-icon.png' },
+            { name: 'Inbox', path: `/lecturer/inbox/${props.params}`, icon: '/assets/timetable-icon.png' },
+            { name: 'Submissions', path: `/lecturer/submissions/${props.params}`, icon: '/assets/submissions-icon.png' },
+            { name: 'All Students', path: `/lecturer/all-students/${props.params}`, icon: '/assets/students-icon.png' },
             { name: 'Group', path: '/lecturer/group', icon: '/assets/students-icon.png' },
             { name: 'Quiz', path: '/lecturer/quiz', icon: '/assets/quiz-icon.png' },
-            { name: 'Settings', path: '/lecturer/profile', icon: '/assets/settings-icon.png' },
+            { name: 'Settings', path: `/lecturer/profile/${props.params}`, icon: '/assets/settings-icon.png' },
           ].map((item, index) => (
             <li key={index} className="relative">
               <Link

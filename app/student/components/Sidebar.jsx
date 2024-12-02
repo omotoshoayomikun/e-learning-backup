@@ -3,10 +3,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import { useParams } from 'next/navigation';
 
 import { usePathname } from 'next/navigation';
 
-const Sidebar = () => {
+const Sidebar = (props) => {
   const [active, setActive] = useState('');
   const [mounted, setMounted] = useState(false);
 
@@ -45,9 +46,9 @@ const Sidebar = () => {
       <nav className="mt-5">
         <ul>
           {[
-            { name: 'Dashboard', path: '/student/dashboard', icon: '/assets/dashboard-icon-black.png' },
-            { name: 'Courses', path: '/student/courses', icon: '/assets/courses-icon.png' },
-            { name: 'My Activity', path: '/student/activity', icon: '/assets/activity-icon.png' },
+            { name: 'Dashboard', path: `/student/dashboard/${props.params}`, icon: '/assets/dashboard-icon-black.png' },
+            { name: 'Courses', path: `/student/courses/${props.params}`, icon: '/assets/courses-icon.png' },
+            { name: 'My Activity', path: `/student/activity/${props.params}`, icon: '/assets/activity-icon.png' },
             { name: 'Time Table', path: '/student/time-table', icon: '/assets/timetable-icon.png' },
             { name: 'Inbox', path: '/student/inbox', icon: '/assets/timetable-icon.png' },
             { name: 'Submissions', path: '/student/submissions', icon: '/assets/submissions-icon.png' },
