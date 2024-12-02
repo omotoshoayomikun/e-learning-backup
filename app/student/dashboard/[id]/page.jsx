@@ -15,11 +15,11 @@ const Dashboard = () => {
   };
 
   const JoinClass = (id) => {
-    router.push(`/student/courses/classroom/${id}/start`);
+    router.push(`/student/courses/classroom/start/${params.id}`);
   };
 
   const ViewDetails = (id) => {
-    router.push(`/student/courses/${id}`);
+    router.push(`/student/courses/course-detail/${params.id}?courseId=${id}`);
   };
 
   const [isClient, setIsClient] = useState(false);
@@ -168,7 +168,7 @@ const Dashboard = () => {
                               <button onClick={() => JoinClass(lecture.class_link.link)} className="text-[12px] bg-white w-[105px] rounded-sm h-[27px] text-primary justify-items-center text-center items-center">
                                 Join the Class
                               </button>
-                              <button onClick={ViewDetails} className="text-white text-[10px]">
+                              <button onClick={() => ViewDetails(lecture._id)} className="text-white text-[10px]">
                                 View Details
                               </button>
                             </div>

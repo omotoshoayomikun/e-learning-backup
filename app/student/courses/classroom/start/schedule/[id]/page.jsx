@@ -1,12 +1,13 @@
 "use client";
 import React, { useState } from "react"; // Import useState
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Sidebar from "../../../../../components/Sidebar";
 import DashboardNav from "../../../../../components/DashboardNav";
 
 const Page = () => {
+  const params = useParams()
   const [isChecked, setIsChecked] = useState(false); // State to track checkbox status
 
   const handleCheckboxChange = () => {
@@ -15,10 +16,10 @@ const Page = () => {
 
   return (
     <div className="flex w-full">
-      <Sidebar />
+      <Sidebar params={params.id} />
       <div className="ml-60 w-full">
         <div className="bg-white w-full h-[128px]">
-          <DashboardNav />
+          <DashboardNav params={params.id} />
         </div>
 
         <motion.div

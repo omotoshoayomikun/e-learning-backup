@@ -3,21 +3,22 @@ import React from "react";
 import Sidebar from "../../../../components/Sidebar";
 import DashboardNav from "../../../../components/DashboardNav";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 
 const page = () => {
   const router = useRouter();
+  const params = useParams()
 
   const navigateToSchedule = (id) => {
-    router.push(`/student/courses/classroom/${id}/start/schedule`); // Navigate to dynamic page
+    router.push(`/student/courses/classroom/start/schedule/${params.id}`); // Navigate to dynamic page
   };
   return (
     <div className="flex w-full">
-      <Sidebar />
+      <Sidebar params={params.id} />
       <div className="ml-60 w-full">
         <div className="bg-white w-full h-[128px]">
-          <DashboardNav />
+          <DashboardNav params={params.id} />
         </div>
 
         <motion.div

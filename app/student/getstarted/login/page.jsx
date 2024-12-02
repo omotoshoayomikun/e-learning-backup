@@ -11,6 +11,7 @@ const Signup = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = () => {
     router.push(`/student/getstarted/login`);
@@ -33,13 +34,16 @@ const Signup = () => {
 
   const Inputs = [
     {
+      id: "staff_id",
       name: "matric_no",
       type: "text",
       placeholder: "Enter matric number",
     },
     {
+      id: "password",
       name: "password",
       type: "password",
+      type: showPassword ? "text" : "password", // Toggle between text/password
       placeholder: "Enter password",
     },
   ]
@@ -87,17 +91,28 @@ const Signup = () => {
           <p className="block text-gray-700 text-sm font-bold mb-2 text-center text-[18px]">
             Please enter your matriculation number
           </p>
-          {
-            Inputs.map((input, i) => (
+          {Inputs.map((input, i) => (
+            <div key={i} className="relative mb-4">
               <Input
-              key={i}
-               {...input}
-                value={value[input.id]}
+                {...input}
+                value={value[input.name]}
                 handleChange={handleInputChange}
               />
-
-            ))
-          }
+              {/* Toggle visibility for password input */}
+              {input.name === "password" && (
+                <span
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <img src="/assets/visibility_on.png" alt="Show" />
+                  ) : (
+                    <img src="/assets/visibility_off.png" alt="Hide" />
+                  )}
+                </span>
+              )}
+            </div>
+          ))}
           <div className="flex justify-between items-center">
             <div className="gap-2 flex justify-between">
               <input type="checkbox" id="checkbox" className="" />
